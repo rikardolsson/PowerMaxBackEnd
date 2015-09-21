@@ -35,6 +35,7 @@ config_t cfg, *cf;
 
 #define FALSE 0
 #define TRUE 1
+#define GCM_SENDER_COMMAND_STRING "/usr/bin/php5 /var/www/gcmsender.php "
 
 pthread_t tid[2];
 
@@ -299,14 +300,55 @@ void KeyPressHandling(void) {
   }
 }        
 
+int send_gcm_notification(char *message)
+{
+    char line[100];
+    char buffer_to_send[256] = {0};
+    int linenr;
+    FILE *pipe;
+    
+    memset(buffer_to_send, 0x00, strlen(buffer_to_send));
+    
+    strncpy(buffer_to_send, GCM_SENDER_COMMAND_STRING, strlen(GCM_SENDER_COMMAND_STRING));
+    strcat(buffer_to_send, message);
+
+    DEBUG(LOG_NOTICE,"Sending buffer to gcm: %s", buffer_to_send);
+    
+    /* Get a pipe where the output from the scripts comes in */
+    pipe = popen(buffer_to_send, "r");
+    
+    if (pipe == NULL) {  /* check for errors */
+		DEBUG(LOG_ERR,"Unable to open php script %s", GCM_SENDER_COMMAND_STRING);
+        return 1;        /* return with exit code indicating error */
+    }
+
+    /* Read script output from the pipe line by line */
+    linenr = 1;
+    while (fgets(line, 100, pipe) != NULL) {
+        printf("Script output line %d: %s", linenr, line);
+        ++linenr;
+    }
+    
+    /* Once here, out of the loop, the script has ended. */
+    pclose(pipe); /* Close the pipe */
+    return 0;     /* return with exit code indicating success. */
+}
 
 void MessageHandling(char *buffer, int newsockfd)
 {
-  int n =0;
+  int n = 0;
+  int answer = 0;
+  pid_t pid;
+  FILE *in, *out, *err;
+  char buffer_read[256];
+  
   if(strcmp(buffer,"EnableAlarm") == 0)
   {
     DEBUG(LOG_NOTICE,"Arming away");
 //    sendBuffer(&PowerlinkCommand[Pmax_ARMAWAY]);
+
+    int answer = send_gcm_notification("PowerMaxArmedAway");
+
   }
   else if (strcmp(buffer,"DisableAlarm") == 0)
   {
@@ -319,7 +361,6 @@ void MessageHandling(char *buffer, int newsockfd)
     if (gatestat.pmstatus == XplStatusPMDisarmed)
     {
       n = write(newsockfd,"PowerMaxDisarmed",16);
-//      n = write(newsockfd,"PowerMaxArmedAway",17);
     }
     else if (gatestat.pmstatus == XplStatusPMArmedAway)
     {

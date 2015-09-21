@@ -315,10 +315,15 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
   
   // if disarmed or exit delay or exit delay
   if (pmaxsystemstatus==0 ) {
+	  printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
    // pmaxSystem.xplalarmstatus=AlarmDisarmed;
    // pmaxSystem.xplpmaxstatus=PmaxDisarmed;
     gatestat.pmstatus=XplStatusPMDisarmed;
     gatestat.status=XplStatusDisarmed;
+    
+    // Send notification to GCM
+    send_gcm_notification("PowerMaxDisarmed");
+    
     for (i=1;i<=30;i++) {
       if (gatestat.zone[i].enrolled) {
       //pmaxSystem.sensor[i].armed=false;
@@ -330,6 +335,7 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
   
   // if disarmed or exit delay or exit delay
   if ( pmaxsystemstatus==1 ) {
+	  printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
    // pmaxSystem.xplalarmstatus=AlarmDisarmed;
    // pmaxSystem.xplpmaxstatus=PmaxDisarmed;
     gatestat.pmstatus=XplStatusPMArmingHome;
@@ -338,14 +344,18 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
   
     // if disarmed or exit delay or exit delay
   if ( pmaxsystemstatus==2) {
+	  printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
    // pmaxSystem.xplalarmstatus=AlarmDisarmed;
    // pmaxSystem.xplpmaxstatus=PmaxDisarmed;
     gatestat.pmstatus=XplStatusPMArmingAway;
     gatestat.status=XplStatusDisarmed;
+    // Send notification to GCM
+    send_gcm_notification("PowerMaxExitDelay");
   }
   
   // if armed home or armed home bypass      
   if (pmaxsystemstatus==4 ||  pmaxsystemstatus==10 )  {
+	  printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
     //pmaxSystem.xplalarmstatus=AlarmArmed;
     //pmaxSystem.xplpmaxstatus=PmaxArmedHome;
     gatestat.pmstatus=XplStatusPMArmedHome;    
@@ -358,10 +368,15 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
   
   // if entry delay or armed away or armed away bypass    
   if (pmaxsystemstatus==3 || pmaxsystemstatus==5 || pmaxsystemstatus==11)  {
+	  printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
  //   pmaxSystem.xplalarmstatus=AlarmArmed;
  //   pmaxSystem.xplpmaxstatus=PmaxArmedAway;
     gatestat.pmstatus=XplStatusPMArmedAway; 
     gatestat.status=XplStatusArmed;
+    
+    // Send notification to GCM
+    send_gcm_notification("PowerMaxArmed");
+    
     for (i=1;i<=30;i++) {
       if (gatestat.zone[i].enrolled)    {
  //       pmaxSystem.sensor[i].armed=true;
@@ -374,11 +389,11 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
    gatestat.status=XplStatusAlarm;
   }
   
-        
  // pmaxSystem.readytoarm=((pmaxSystem.flags & 0x01)==1);
 
   // if system state flag says it is a zone event (bit 5 of system flag)  
    if (pmaxsystemstate & 1<<5) {
+	printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
     sprintf(tpbuff1,"     Zone %d %s", Buff->buffer[5],PmaxZoneEventTypes[Buff->buffer[6]]);
     if  ( 0<Buff->buffer[5] && Buff->buffer[5]<30 && Buff->buffer[6]==5 )
     {
@@ -390,6 +405,7 @@ void PmaxEnroll(struct PlinkBuffer  * Buff)
     
     if  ( 0<Buff->buffer[5] && Buff->buffer[5]<30 && Buff->buffer[6]==0x0F )
     {
+	printf("!!!!EOLSRIK at line %d and function %s\n", __LINE__, __func__);
     gatestat.zone[Buff->buffer[5]].info.zonetype=XplType24hour;
     gatestat.zone[Buff->buffer[5]].info.alarmtype=XplAlarmTypeFire;  
  //   pmaxSystem.sensor[Buff->buffer[5]].type=interior;

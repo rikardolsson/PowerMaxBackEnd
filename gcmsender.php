@@ -8,7 +8,6 @@
             'data' => $message,
         );
                 // Update your Google Cloud Messaging API Key
-        //      define("GOOGLE_API_KEY", "API_SERVER_KEY");
         define("GOOGLE_API_KEY", "API_SERVER_KEY");
         $headers = array(
             'Authorization: key=' . GOOGLE_API_KEY,
@@ -32,12 +31,11 @@
     }
 ?>
 <?php
-  $gcmRegID  = file_get_contents("/var/www/gcm/GCMRegId.txt");
+  $gcmRegID  = file_get_contents("/var/www/GCMRegId.txt");
   $pushMessage = $argv[1];
   if (isset($gcmRegID)) {
     $gcmRegIds = array($gcmRegID);
     $message = array("m" => $pushMessage);
-//    echo "RegID is $gcmRegID ";
     $pushStatus = sendMessageThroughGCM($gcmRegIds, $message);
   }
   else {
